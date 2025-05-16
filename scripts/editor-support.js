@@ -5,11 +5,11 @@ import {
   decorateIcons,
   decorateSections,
   loadBlock,
-  loadScript,
-  loadSections,
-} from './aem.js';
+  loadBlocks,
+} from './lib-franklin.js';
 import { decorateRichtext } from './editor-support-rte.js';
 import { decorateMain } from './scripts.js';
+import { updateButtons } from '../blocks/carousel/carousel.js';
 
 async function applyChanges(event) {
   // redecorate default content and blocks on patches (in the properties rail)
@@ -24,11 +24,7 @@ async function applyChanges(event) {
   const { content } = updates[0];
   if (!content) return false;
 
-  // load dompurify
-  await loadScript(`${window.hlx.codeBasePath}/scripts/dompurify.min.js`);
-
-  const sanitizedContent = window.DOMPurify.sanitize(content, { USE_PROFILES: { html: true } });
-  const parsedUpdate = new DOMParser().parseFromString(sanitizedContent, 'text/html');
+  const parsedUpdate = new DOMParser().parseFromString(content, 'text/html');
   const element = document.querySelector(`[data-aue-resource="${resource}"]`);
 
   if (element) {
@@ -38,7 +34,7 @@ async function applyChanges(event) {
       element.insertAdjacentElement('afterend', newMain);
       decorateMain(newMain);
       decorateRichtext(newMain);
-      await loadSections(newMain);
+      await loadBlocks(newMain);
       element.remove();
       newMain.style.display = null;
       // eslint-disable-next-line no-use-before-define
@@ -76,7 +72,7 @@ async function applyChanges(event) {
           decorateRichtext(newSection);
           decorateSections(parentElement);
           decorateBlocks(parentElement);
-          await loadSections(parentElement);
+          await loadBlocks(parentElement);
           element.remove();
           newSection.style.display = null;
         } else {
@@ -93,6 +89,25 @@ async function applyChanges(event) {
   return false;
 }
 
+function updateUi(event) {
+  const { detail, target } = event;
+  if (!detail.selected) return;
+
+  function handleSelectTabItem(tabItem) {
+    const index = tabItem.getAttribute('data-tab-index');
+    const button = tabItem.closest('.tabs-container').querySelector(`button[data-tab-index="${index}"]`);
+    button.click();
+  }
+  
+  function handleSelectSlide(slide) {
+    slide.parentElement.scrollTo({ top: 0, left: slide.offsetLeft - slide.parentNode.offsetLeft, behavior: 'instant' });
+    updateButtons(slide);
+  }
+
+  if (target.closest('.tab-item')) handleSelectTabItem(target.closest('.tab-item'));
+  if (target.closest('.slide')) handleSelectSlide(target.closest('.slide'));
+}
+
 function attachEventListners(main) {
   [
     'aue:content-patch',
@@ -100,12 +115,13 @@ function attachEventListners(main) {
     'aue:content-add',
     'aue:content-move',
     'aue:content-remove',
-    'aue:content-copy',
   ].forEach((eventType) => main?.addEventListener(eventType, async (event) => {
     event.stopPropagation();
     const applied = await applyChanges(event);
     if (!applied) window.location.reload();
   }));
+
+  main.addEventListener('aue:ui-select', updateUi);
 }
 
 attachEventListners(document.querySelector('main'));
