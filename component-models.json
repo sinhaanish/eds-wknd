@@ -278,5 +278,24 @@
         "valueType": "string"
       }
     ]
+  },
+  {
+    "id": "custom-text",
+    "fields": [
+      {
+        "component": "text",
+        "name": "customText",
+        "value": "",
+        "label": "Enter the text",
+        "valueType": "string"
+      },
+      {
+        "component": "richtext",
+        "name": "customDescription",
+        "value": "",
+        "label": "Custom Description",
+        "valueType": "string"
+      }
+    ]
   }
 ]

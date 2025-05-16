@@ -252,6 +252,21 @@
               }
             }
           }
+        },
+        {
+          "title": "Custom Text",
+          "id": "custom-text",
+          "plugins": {
+            "xwalk": {
+              "page": {
+                "resourceType": "core/franklin/components/text/v1/text",
+                "template": {
+                  "name": "Custom Text",
+                  "model": "custom-text"
+                }
+              }
+            }
+          }
         }
       ]
     }
