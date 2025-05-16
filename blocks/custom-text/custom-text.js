@@ -1,5 +1,7 @@
 export default function decorate(block) {
     // Create a new element to display the current date and time
+    console.log('block-->',block)
+    alert("block:::",block)
     const dateTimeElement = document.createElement('div');
     dateTimeElement.style.fontSize = '16px';
     dateTimeElement.style.fontWeight = 'bold';
